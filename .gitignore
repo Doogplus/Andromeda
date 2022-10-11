@@ -1,0 +1,7 @@
+*.swp
+bazel-*
+compile_commands.json
+build/
+cmake-build-debug/
+.idea/
+.clang-format
