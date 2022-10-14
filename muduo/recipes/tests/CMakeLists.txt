@@ -1,0 +1,5 @@
+add_executable(reactor_test_01 ReactorTest_01.cpp)
+target_link_libraries(reactor_test_01 muduo_recipes)
+
+add_executable(reactor_test_02 ReactorTest_02.cpp)
+target_link_libraries(reactor_test_02 muduo_recipes)

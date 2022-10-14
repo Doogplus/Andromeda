@@ -42,8 +42,7 @@ class Logger {
     explicit SourceFile(const char* filename)
       : data_(filename) {
       const char* slash = strrchr(filename, '/');
-      if (slash)
-      {
+      if (slash) {
         data_ = slash + 1;
       }
       size_ = static_cast<int>(strlen(data_));

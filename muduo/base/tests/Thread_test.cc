@@ -5,43 +5,35 @@
 #include <stdio.h>
 #include <unistd.h>
 
-void mysleep(int seconds)
-{
+void mysleep(int seconds) {
   timespec t = { seconds, 0 };
   nanosleep(&t, NULL);
 }
 
-void threadFunc()
-{
+void threadFunc() {
   printf("tid=%d\n", muduo::CurrentThread::tid());
 }
 
-void threadFunc2(int x)
-{
+void threadFunc2(int x) {
   printf("tid=%d, x=%d\n", muduo::CurrentThread::tid(), x);
 }
 
-void threadFunc3()
-{
+void threadFunc3() {
   printf("tid=%d\n", muduo::CurrentThread::tid());
   mysleep(1);
 }
 
-class Foo
-{
+class Foo {
  public:
   explicit Foo(double x)
-    : x_(x)
-  {
+    : x_(x) {
   }
 
-  void memberFunc()
-  {
+  void memberFunc() {
     printf("tid=%d, Foo::x_=%f\n", muduo::CurrentThread::tid(), x_);
   }
 
-  void memberFunc2(const std::string& text)
-  {
+  void memberFunc2(const std::string& text) {
     printf("tid=%d, Foo::x_=%f, text=%s\n", muduo::CurrentThread::tid(), x_, text.c_str());
   }
 
@@ -49,8 +41,7 @@ class Foo
   double x_;
 };
 
-int main()
-{
+int main() {
   printf("pid=%d, tid=%d\n", ::getpid(), muduo::CurrentThread::tid());
 
   muduo::Thread t1(threadFunc);
@@ -61,7 +52,7 @@ int main()
   muduo::Thread t2(std::bind(threadFunc2, 42),
                    "thread for free function with argument");
   t2.start();
-  printf("t2.tid=%d\n", t2.tid());
+  printf("t2.tid=%d, t2.name:%s\n", t2.tid(),t2.name().c_str());
   t2.join();
 
   Foo foo(87.53);

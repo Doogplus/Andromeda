@@ -14,11 +14,9 @@
 #include <memory>
 #include <pthread.h>
 
-namespace muduo
-{
+namespace muduo {
 
-class Thread : noncopyable
-{
+class Thread : noncopyable {
  public:
   typedef std::function<void ()> ThreadFunc;
 
