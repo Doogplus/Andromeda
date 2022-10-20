@@ -3,3 +3,12 @@ target_link_libraries(reactor_test_01 muduo_recipes)
 
 add_executable(reactor_test_02 ReactorTest_02.cpp)
 target_link_libraries(reactor_test_02 muduo_recipes)
+
+add_executable(reactor_test_03 ReactorTest_03.cpp)
+target_link_libraries(reactor_test_03 muduo_recipes)
+
+add_executable(reactor_test_04 ReactorTest_04.cpp)
+target_link_libraries(reactor_test_04 muduo_recipes)
+
+add_executable(reactor_test_05 ReactorTest_05.cpp)
+target_link_libraries(reactor_test_05 muduo_recipes)
