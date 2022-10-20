@@ -1,5 +1,6 @@
 set(recipes_SRCS
         EventLoop.cpp
+        EventLoopThread.cpp
         Channel.cpp
         Poller.cpp
         poller/DefaultPoller.cpp
@@ -14,6 +15,7 @@ target_link_libraries(muduo_recipes muduo_base)
 install(TARGETS muduo_recipes DESTINATION lib)
 set(HEADERS
         EventLoop.h
+        EventLoopThread.h
         Channel.h
         Poller.h
         TimerId.h)

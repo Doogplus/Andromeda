@@ -8,15 +8,30 @@
 #include "muduo/recipes/Poller.h"
 #include "muduo/recipes/TimerQueue.h"
 
+#include <boost/bind.hpp>
+#include <sys/eventfd.h>
+
 using namespace muduo;
 using namespace recipes;
 
 namespace {
-    // 当前线程EventLoop object pointer
-    // thread locally stored
-    __thread EventLoop* t_loopInThisThread = nullptr;
 
-    const int kPollTimeMs = 10000;
+// 当前线程EventLoop object pointer
+// thread locally stored
+__thread EventLoop* t_loopInThisThread = nullptr;
+
+const int kPollTimeMs = 10000;
+
+int createEventfd() {
+    int eventfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    if (eventfd < 0) {
+        LOG_SYSERR << "Failed in eventfd";
+        abort();
+    }
+
+    return eventfd;
+}
+
 }
 
 EventLoop* EventLoop::getEventLoopOfCurrentThread() {
@@ -27,9 +42,12 @@ EventLoop::EventLoop()
     : looping_(false)
     , quit_(false)
     , eventHandling_(false)
-      , threadId_(CurrentThread::tid())
+    , callingPendingFunctors_(false)
+    , threadId_(CurrentThread::tid())
     , poller_(Poller::newDefaultPoller(this))
     , timerQueue_(new TimerQueue(this))
+    , wakeupFd_(createEventfd())
+    , wakeupChannel_(new Channel(this, wakeupFd_))
     , currentActivateChannel_(nullptr) {
     LOG_TRACE << "EventLoop create " << this << " in thread " << threadId_;
     if (t_loopInThisThread) {
@@ -38,9 +56,12 @@ EventLoop::EventLoop()
     } else {
         t_loopInThisThread = this;
     }
+    wakeupChannel_->setReadCallback(boost::bind(&EventLoop::handleRead, this));
+    wakeupChannel_->enableReading();
 }
 
 EventLoop::~EventLoop() {
+    ::close(wakeupFd_);
     t_loopInThisThread = nullptr;
 }
 
@@ -50,7 +71,8 @@ void EventLoop::loop() {
     assert(!looping_);
     assertInLoopThread();
     looping_ = true;
-    LOG_TRACE << "EventLoop " << this << "start looping";
+    quit_ = false;
+    LOG_TRACE << "EventLoop " << this << " start looping";
 
     // ::poll(nullptr, 0, 5 * 1000);
     while (!quit_) {
@@ -76,7 +98,7 @@ void EventLoop::loop() {
 void EventLoop::quit() {
     quit_ = true;
     if (!isInLoopThread()) {
-        // wakeup();
+        wakeup();
     }
 }
 
