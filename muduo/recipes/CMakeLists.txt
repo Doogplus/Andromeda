@@ -1,5 +1,6 @@
 set(recipes_SRCS
         Acceptor.cpp
+        Buffer.cpp
         Channel.cpp
         EventLoop.cpp
         EventLoopThread.cpp
@@ -22,6 +23,7 @@ target_link_libraries(muduo_recipes muduo_base)
 install(TARGETS muduo_recipes DESTINATION lib)
 set(HEADERS
         Acceptor.h
+        Buffer.h
         Channel.h
         EventLoop.h
         EventLoopThread.h

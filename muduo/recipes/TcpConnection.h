@@ -10,6 +10,7 @@
 #include "muduo/base/Types.h"
 #include "muduo/recipes/Callbacks.h"
 #include "muduo/recipes/InetAddress.h"
+#include "muduo/recipes/Buffer.h"
 
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/noncopyable.hpp>
@@ -47,6 +48,12 @@ class TcpConnection : boost::noncopyable,
   const InetAddress& peerAddress() { return peerAddr_; }
   bool connected() const { return state_ == kConnected; }
 
+  void send(const void* message, size_t len);
+  void send(const StringPiece& message);
+  void send(Buffer* message);
+  void shutdown();
+  void setTcpNoDelay(bool on);
+
   void setConnectionCallback(const ConnectionCallback& cb)
   { connectionCallback_ = cb; }
 
@@ -67,6 +74,9 @@ class TcpConnection : boost::noncopyable,
   void handleRead(Timestamp receiveTime);
   void handleClose();
   void handleError();
+  void sendInLoop(const StringPiece& message);
+  void sendInLoop(const void* message, size_t len);
+  void shutdownInLoop();
   void setState(StateE s) { state_ = s; }
 
   EventLoop* loop_;			// 所属EventLoop
@@ -80,6 +90,8 @@ class TcpConnection : boost::noncopyable,
   ConnectionCallback connectionCallback_;
   MessageCallback messageCallback_;
   CloseCallback closeCallback_;
+  Buffer inputBuffer_;
+  Buffer outputBuffer_;
 };
 
 typedef boost::shared_ptr<TcpConnection> TcpConnectionPtr;
